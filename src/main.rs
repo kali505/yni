@@ -1,33 +1,59 @@
-use std::io;
+use std::fs::File;
 use std::io::prelude::*;
+use std::path::PathBuf;
+use std::{env, io};
 
-const HEX_MAP: &[char] = &[
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
-];
+mod conversion;
 
-fn to_hex_str(src: &String, sum: &mut String) {
-    for x in src.as_bytes() {
-        let high_nbl = (x >> 4) as usize;
-        let low_nbl = (x & 0x0F) as usize;
+use conversion::convert_str;
 
-        sum.push(HEX_MAP[high_nbl]);
-        sum.push(HEX_MAP[low_nbl]);
-    }
-}
+const DEFAULT_OUTPUT_FORMAT: u32 = 2;
 
 fn main() {
-    let mut stdin = io::stdin().lock();
-    let mut s = String::new();
-    stdin.read_line(&mut s).unwrap();
-    s.pop();
+    let mut arg_iter = env::args().skip(1);
+    let mut source_file = None;
+    let mut output_format = DEFAULT_OUTPUT_FORMAT;
 
-    let mut out = String::new();
-    to_hex_str(&s, &mut out);
-    println!("0x{}", out);
-
-    if cfg!(target_endian = "big") {
-        println!("[Big Endian, UTF-8]");
-    } else {
-        println!("[Little Endian, UTF-8]");
+    while let Some(a) = arg_iter.next() {
+        match a.as_str() {
+            "-f" => {
+                if arg_iter.len() == 0 {
+                    println!("Wrong usage of '-f', ignoring...");
+                }
+                source_file = arg_iter.next();
+            }
+            "-o" => {
+                if let Some(x) = arg_iter.next() {
+                    if let Ok(parsed) = x.parse() {
+                        output_format = parsed;
+                    } else {
+                        println!("Wrong usage of '-o', ignoring...");
+                    }
+                } else {
+                    println!("Wrong usage of '-o', ignoring...");
+                }
+            }
+            _ => {}
+        }
     }
+
+    let mut buf = String::new();
+    if source_file.is_some() {
+        let file_path = PathBuf::from(source_file.unwrap());
+
+        if let Ok(mut f) = File::open(&file_path) {
+            f.read_to_string(&mut buf).unwrap();
+        } else {
+            println!("Cannot Open File {}", file_path.to_str().unwrap());
+            return;
+        }
+    } else {
+        let mut stdin = io::stdin().lock();
+
+        println!("^d(EOF) for finish the input.");
+        stdin.read_to_string(&mut buf).unwrap();
+    }
+
+    println!("\nUTF-8, {}진수", output_format);
+    println!("{}", convert_str(buf.as_str(), output_format));
 }
