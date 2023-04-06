@@ -25,6 +25,7 @@ pub fn convert_str(src: &str, format: u32) -> String {
         for x_ in src.as_bytes() {
             if *x_ == 0 {
                 ret.push_str("0 ");
+                continue;
             }
             let mut x = *x_ as u32;
 
@@ -57,6 +58,7 @@ pub fn convert_str(src: &str, format: u32) -> String {
         for x_ in src.as_bytes() {
             if *x_ == 0 {
                 ret.push_str("0 ");
+                continue;
             }
 
             let mut x = *x_ as u32;

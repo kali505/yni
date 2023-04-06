@@ -25,7 +25,11 @@ fn main() {
             "-o" => {
                 if let Some(x) = arg_iter.next() {
                     if let Ok(parsed) = x.parse() {
-                        output_format = parsed;
+                        if parsed >= 2 && parsed <= 36 {
+                            output_format = parsed;
+                        } else {
+                            println!("Arguemnt of '-o', N should be 36 >= N >= 2, ignoring...");
+                        }
                     } else {
                         println!("Wrong usage of '-o', ignoring...");
                     }
