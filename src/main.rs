@@ -3,9 +3,7 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 use std::{env, io};
 
-mod conversion;
-
-use conversion::convert_str;
+use libyni::to_base_str;
 
 const DEFAULT_OUTPUT_FORMAT: u32 = 2;
 
@@ -59,5 +57,5 @@ fn main() {
     }
 
     println!("\nUTF-8, {}진수", output_format);
-    println!("{}", convert_str(buf.as_str(), output_format));
+    println!("{}", to_base_str(buf.as_str(), output_format));
 }
